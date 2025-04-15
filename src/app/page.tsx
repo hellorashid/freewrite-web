@@ -1246,6 +1246,19 @@ export default function Home() {
               </button>
             </div>
 
+            {/* History icon */}
+            <button
+              onClick={() => setShowSidebar(!showSidebar)}
+              className={`${
+                darkMode
+                  ? "text-gray-400 hover:text-gray-200"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+              title="Show history"
+            >
+              <History className="h-5 w-5" />
+            </button>
+
             {/* Settings icon */}
             <Popover.Root>
               <Popover.Trigger asChild>
