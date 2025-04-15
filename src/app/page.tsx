@@ -2,12 +2,340 @@
 
 import { useEffect, useRef, useState } from "react";
 
+
+import { motion, AnimatePresence } from "framer-motion"
+import { Menu, X, Home as HomeIcon, Settings, Bell, User, Type, Text, Clock, History, Moon, Sun, AlignLeft, AlignRight, Maximize2, Minimize2, Delete, ALargeSmall, Timer } from "lucide-react"
+import * as Popover from '@radix-ui/react-popover';
+
+ function MobileMenu({ 
+  darkMode, 
+  setFontFamily, 
+  setFontSize, 
+  fontSizeIndex, 
+  setFontSizeIndex,
+  startTimer,
+  stopTimer,
+  timerRunning,
+  setShowSidebar,
+  shareWithChatGPT,
+  shareWithClaude,
+  toggleDarkMode,
+  toggleRtlMode,
+  rtlMode,
+  toggleFullScreen,
+  isFullscreen,
+  setBackspaceDisabled,
+  backspaceDisabled,
+  fontFamily
+}: { 
+  darkMode: boolean;
+  setFontFamily: (font: string) => void;
+  setFontSize: (size: number) => void;
+  fontSizeIndex: number;
+  setFontSizeIndex: (index: number) => void;
+  startTimer: () => void;
+  stopTimer: () => void;
+  timerRunning: boolean;
+  setShowSidebar: (show: boolean) => void;
+  shareWithChatGPT: () => void;
+  shareWithClaude: () => void;
+  toggleDarkMode: () => void;
+  toggleRtlMode: () => void;
+  rtlMode: boolean;
+  toggleFullScreen: () => void;
+  isFullscreen: boolean;
+  setBackspaceDisabled: (disabled: boolean) => void;
+  backspaceDisabled: boolean;
+  fontFamily: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
+
+  const toggleMenu = () => {
+    setIsOpen(!isOpen)
+  }
+
+  const fontOptions = [
+    { name: "Lato", value: "Lato" },
+    { name: "Arial", value: "Arial" },
+    { name: "System", value: "system-ui" },
+    { name: "Serif", value: "Times New Roman" },
+  ]
+
+  const fontSizeOptions = [16, 18, 20, 22, 24, 26]
+
+  const cycleFontSize = () => {
+    const nextIndex = (fontSizeIndex + 1) % fontSizeOptions.length;
+    setFontSizeIndex(nextIndex);
+    setFontSize(fontSizeOptions[nextIndex]);
+  }
+
+  const menuItems = [
+    { 
+      icon: <Type className="h-5 w-5" />, 
+      label: "Font",
+      onClick: () => {
+        const currentIndex = fontOptions.findIndex(f => f.value === fontFamily)
+        const nextIndex = (currentIndex + 1) % fontOptions.length
+        setFontFamily(fontOptions[nextIndex].value)
+      }
+    },
+    { 
+      icon: <ALargeSmall className="h-5 w-5" />, 
+      label: "Text Size",
+      onClick: cycleFontSize
+    },
+    { 
+      icon: <Timer className="h-5 w-5" />, 
+      label: "Timer",
+      onClick: () => timerRunning ? stopTimer() : startTimer()
+    },
+    { 
+      icon: <History className="h-5 w-5" />, 
+      label: "History",
+      onClick: () => setShowSidebar(true)
+    },
+  ]
+
+  const topMenuItems = [
+    { 
+      icon: <img src="/chatgpt_icon.png" alt="ChatGPT" className="h-5 w-5" />, 
+      label: "ChatGPT",
+      onClick: shareWithChatGPT
+    },
+    { 
+      icon: <img src="/claude_icon.png" alt="Claude" className={`h-5 w-5 ${!darkMode ? "invert" : ""}`} />, 
+      label: "Claude",
+      onClick: shareWithClaude
+    },
+    { 
+      icon: <Settings className="h-5 w-5" />, 
+      label: "Settings",
+      onClick: () => setShowSettings(true)
+    },
+  ]
+
+  return (
+    <div className="md:hidden fixed bottom-6 right-6 z-50">
+      {/* Top Menu Items */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="absolute bottom-20 right-0 flex flex-col items-end space-y-2"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+          >
+            {topMenuItems.map((item, index) => (
+              <motion.button
+                key={index}
+                className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-primary shadow-md"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  transition: {
+                    delay: 0.05 * (topMenuItems.length - 1 - index),
+                  },
+                }}
+                exit={{
+                  opacity: 0,
+                  y: 20,
+                  transition: {
+                    delay: 0.05 * index,
+                  },
+                }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={item.onClick}
+              >
+                {item.icon}
+                <span className="sr-only">{item.label}</span>
+              </motion.button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Bottom Menu Items */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="absolute bottom-0 right-16 flex items-end space-x-2"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+          >
+            {menuItems.map((item, index) => (
+              <motion.button
+                key={index}
+                className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-primary shadow-md"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  transition: {
+                    delay: 0.05 * (menuItems.length - 1 - index),
+                  },
+                }}
+                exit={{
+                  opacity: 0,
+                  y: 20,
+                  transition: {
+                    delay: 0.05 * index,
+                  },
+                }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={item.onClick}
+              >
+                {item.icon}
+                <span className="sr-only">{item.label}</span>
+              </motion.button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Settings Modal */}
+      <AnimatePresence>
+        {showSettings && (
+          <motion.div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className={`rounded-lg p-4 w-72 shadow-lg ${
+                darkMode ? "bg-gray-800" : "bg-white"
+              }`}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+            >
+              <div className="flex flex-col space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className={`text-sm font-medium ${darkMode ? "text-gray-200" : "text-gray-900"}`}>
+                    Settings
+                  </h3>
+                  <button
+                    onClick={() => setShowSettings(false)}
+                    className={`p-1 rounded-full hover:bg-opacity-10 ${
+                      darkMode ? "hover:bg-white" : "hover:bg-gray-900"
+                    }`}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <h4 className={`text-xs font-medium ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                      Appearance
+                    </h4>
+                    <div className="flex items-center justify-between">
+                      <span className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                        Dark Mode
+                      </span>
+                      <button
+                        onClick={toggleDarkMode}
+                        className={`p-1.5 rounded-full ${
+                          darkMode ? "bg-gray-700" : "bg-gray-200"
+                        }`}
+                      >
+                        {darkMode ? (
+                          <Moon className="h-4 w-4" />
+                        ) : (
+                          <Sun className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                        RTL Mode
+                      </span>
+                      <button
+                        onClick={toggleRtlMode}
+                        className={`p-1.5 rounded-full ${
+                          darkMode ? "bg-gray-700" : "bg-gray-200"
+                        }`}
+                      >
+                        {rtlMode ? (
+                          <AlignLeft className="h-4 w-4" />
+                        ) : (
+                          <AlignRight className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className={`text-xs font-medium ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                      Editor
+                    </h4>
+                    <div className="flex items-center justify-between">
+                      <span className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                        Fullscreen
+                      </span>
+                      <button
+                        onClick={toggleFullScreen}
+                        className={`p-1.5 rounded-full ${
+                          darkMode ? "bg-gray-700" : "bg-gray-200"
+                        }`}
+                      >
+                        {isFullscreen ? (
+                          <Minimize2 className="h-4 w-4" />
+                        ) : (
+                          <Maximize2 className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                        Backspace
+                      </span>
+                      <button
+                        onClick={() => setBackspaceDisabled(!backspaceDisabled)}
+                        className={`p-1.5 rounded-full ${
+                          darkMode ? "bg-gray-700" : "bg-gray-200"
+                        }`}
+                      >
+                        <Delete className={`h-4 w-4 ${backspaceDisabled ? "opacity-50" : ""}`} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Menu Button */}
+      <motion.button
+        className={`flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground ${
+          isOpen ? "shadow-lg" : "shadow-md opacity-80"
+        }`}
+        onClick={toggleMenu}
+        whileTap={{ scale: 0.9 }}
+      >
+        {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+      </motion.button>
+    </div>
+  )
+}
+
+
 export default function Home() {
   const [text, setText] = useState<string>("");
   const [entries, setEntries] = useState<Entry[]>([]);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
   const [showSidebar, setShowSidebar] = useState<boolean>(false);
   const [fontSize, setFontSize] = useState<number>(18);
+  const [fontSizeIndex, setFontSizeIndex] = useState<number>(2); // Start at 18px (index 2)
   const [fontFamily, setFontFamily] = useState<string>("Lato");
   const [timeRemaining, setTimeRemaining] = useState<number>(900); // 15 minutes
   const [timerRunning, setTimerRunning] = useState<boolean>(false);
@@ -427,6 +755,12 @@ export default function Home() {
     };
   }, []);
 
+  const cycleFontSize = () => {
+    const nextIndex = (fontSizeIndex + 1) % fontSizeOptions.length;
+    setFontSizeIndex(nextIndex);
+    setFontSize(fontSizeOptions[nextIndex]);
+  };
+
   return (
     <div
       className={`flex h-screen w-screen overflow-hidden ${
@@ -640,9 +974,32 @@ export default function Home() {
           </div>
         </div>
 
+
+        <MobileMenu 
+          darkMode={darkMode}
+          setFontFamily={setFontFamily}
+          setFontSize={setFontSize}
+          fontSizeIndex={fontSizeIndex}
+          setFontSizeIndex={setFontSizeIndex}
+          startTimer={startTimer}
+          stopTimer={stopTimer}
+          timerRunning={timerRunning}
+          setShowSidebar={setShowSidebar}
+          shareWithChatGPT={shareWithChatGPT}
+          shareWithClaude={shareWithClaude}
+          toggleDarkMode={toggleDarkMode}
+          toggleRtlMode={toggleRtlMode}
+          rtlMode={rtlMode}
+          toggleFullScreen={toggleFullScreen}
+          isFullscreen={isFullscreen}
+          setBackspaceDisabled={setBackspaceDisabled}
+          backspaceDisabled={backspaceDisabled}
+          fontFamily={fontFamily}
+        />
+
         {/* Bottom controls */}
         <div
-          className={`border-t ${
+          className={`hidden md:flex border-t ${
             darkMode ? "border-gray-700" : "border-gray-200"
           } p-3 flex justify-between items-center transition-opacity duration-300 ${
             showControls ? "opacity-100" : "opacity-0"
@@ -653,36 +1010,6 @@ export default function Home() {
           {/* Font controls */}
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <select
-                value={fontSize}
-                onChange={(e) => setFontSize(Number(e.target.value))}
-                className={`text-sm ${
-                  darkMode
-                    ? "bg-gray-800 text-gray-200 dark-select"
-                    : "bg-transparent"
-                } p-1 rounded border ${
-                  darkMode ? "border-gray-700" : "border-gray-200"
-                }`}
-                style={{
-                  WebkitAppearance: darkMode ? "none" : undefined,
-                  MozAppearance: darkMode ? "none" : undefined,
-                  appearance: darkMode ? "none" : undefined,
-                  backgroundImage: darkMode
-                    ? 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23e5e7eb%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")'
-                    : undefined,
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "right 0.5rem center",
-                  backgroundSize: "0.65em",
-                  paddingRight: darkMode ? "1.5rem" : undefined,
-                }}
-              >
-                {fontSizeOptions.map((size) => (
-                  <option key={size} value={size}>
-                    {size}px
-                  </option>
-                ))}
-              </select>
-
               <select
                 value={fontFamily}
                 onChange={(e) => setFontFamily(e.target.value)}
@@ -712,6 +1039,18 @@ export default function Home() {
                   </option>
                 ))}
               </select>
+
+              <button
+                onClick={cycleFontSize}
+                className={`flex items-center space-x-1 px-2 py-1 rounded-md ${
+                  darkMode
+                    ? "bg-gray-800 text-gray-200 hover:bg-gray-700"
+                    : "bg-transparent text-gray-800 hover:bg-gray-100"
+                }`}
+                title="Change font size"
+              >
+                <span className="text-sm">{fontSize}px</span>
+              </button>
             </div>
           </div>
 
@@ -821,170 +1160,6 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Backspace toggle button */}
-            <button
-              onClick={() => setBackspaceDisabled(!backspaceDisabled)}
-              className={`${
-                darkMode
-                  ? "text-gray-400 hover:text-gray-200"
-                  : "text-gray-500 hover:text-gray-700"
-              } p-1 relative group`}
-              title={
-                backspaceDisabled
-                  ? "Backspace is currently disabled. Click to enable."
-                  : "Backspace is currently enabled. Click to disable."
-              }
-            >
-              {backspaceDisabled ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M6.707 4.879A3 3 0 018.828 4H15a3 3 0 013 3v6a3 3 0 01-3 3H8.828a3 3 0 01-2.12-.879l-4.415-4.414a1 1 0 010-1.414l4.414-4.414zm4 2.414a1 1 0 00-1.414 1.414L10.586 10l-1.293 1.293a1 1 0 101.414 1.414L12 11.414l1.293 1.293a1 1 0 001.414-1.414L13.414 10l1.293-1.293a1 1 0 00-1.414-1.414L12 8.586l-1.293-1.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M6.707 4.879A3 3 0 018.828 4H15a3 3 0 013 3v6a3 3 0 01-3 3H8.828a3 3 0 01-2.12-.879l-4.415-4.414a1 1 0 010-1.414l4.414-4.414zM12.172 4H15a1 1 0 011 1v6a1 1 0 01-1 1H8.828a1 1 0 01-.707-.293L4.414 8l3.707-3.707A1 1 0 018.828 4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              )}
-              <span
-                className={`absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium ${
-                  darkMode
-                    ? "bg-gray-800 text-gray-100"
-                    : "bg-white text-gray-900"
-                } rounded shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none border ${
-                  darkMode ? "border-gray-700" : "border-gray-200"
-                }`}
-              >
-                {backspaceDisabled
-                  ? "Backspace is disabled"
-                  : "Backspace is enabled"}
-              </span>
-            </button>
-
-            {/* Dark Mode toggle */}
-            <button
-              className={`${
-                darkMode
-                  ? "text-gray-400 hover:text-gray-200"
-                  : "text-gray-500 hover:text-gray-700"
-              } p-1`}
-              onClick={toggleDarkMode}
-              title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-            >
-              {darkMode ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                </svg>
-              )}
-            </button>
-
-            {/* RTL toggle button */}
-            <button
-              className={`${
-                darkMode
-                  ? "text-gray-400 hover:text-gray-200"
-                  : "text-gray-500 hover:text-gray-700"
-              } p-1 relative group`}
-              onClick={toggleRtlMode}
-              title={rtlMode ? "Switch to LTR" : "Switch to RTL"}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                {rtlMode ? (
-                  // LTR icon (when currently in RTL mode)
-                  <>
-                    <path d="M3 8h13a4 4 0 0 1 4 4v0a4 4 0 0 1-4 4H3" />
-                    <path d="m8 4-4 4 4 4" />
-                  </>
-                ) : (
-                  // RTL icon (when currently in LTR mode)
-                  <>
-                    <path d="M21 8h-13a4 4 0 0 0-4 4v0a4 4 0 0 0 4 4h13" />
-                    <path d="m16 4 4 4-4 4" />
-                  </>
-                )}
-              </svg>
-              <span
-                className={`absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium ${
-                  darkMode
-                    ? "bg-gray-800 text-gray-100"
-                    : "bg-white text-gray-900"
-                } rounded shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none border ${
-                  darkMode ? "border-gray-700" : "border-gray-200"
-                }`}
-              >
-                {rtlMode ? "Left-to-Right" : "Right-to-Left"}
-              </span>
-            </button>
-
-            {/* Toggle sidebar button */}
-            <button
-              className={`${
-                darkMode
-                  ? "text-gray-400 hover:text-gray-200"
-                  : "text-gray-500 hover:text-gray-700"
-              } p-1`}
-              onClick={() => setShowSidebar(!showSidebar)}
-              title={showSidebar ? "Hide entries" : "Show entries"}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </button>
-
             {/* AI helpers */}
             <div className="flex items-center space-x-2">
               <button
@@ -996,14 +1171,7 @@ export default function Home() {
                 }`}
                 title="Share with ChatGPT"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z" />
-                </svg>
+                <img src="/chatgpt_icon.png" alt="ChatGPT" className="h-5 w-5" />
               </button>
               <button
                 onClick={shareWithClaude}
@@ -1014,16 +1182,131 @@ export default function Home() {
                 }`}
                 title="Share with Claude"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 16c-3.31 0-6-2.69-6-6 0-3.32 2.69-6 6-6 3.31 0 6 2.69 6 6 0 3.31-2.69 6-6 6zm5.91-6c0 2.61-1.67 4.85-4 5.66V15c0-1.1-.9-2-2-2h-2v-2h2c1.1 0 2-.9 2-2V7.33c2.33.81 4 3.05 4 5.67z" />
-                </svg>
+                <img 
+                  src="/claude_icon.png" 
+                  alt="Claude" 
+                  className={`h-5 w-5 ${!darkMode ? "invert" : ""}`} 
+                />
               </button>
             </div>
+
+            {/* Settings icon */}
+            <Popover.Root>
+              <Popover.Trigger asChild>
+                <button
+                  className={`${
+                    darkMode
+                      ? "text-gray-400 hover:text-gray-200"
+                      : "text-gray-500 hover:text-gray-700"
+                  } p-1`}
+                  title="Settings"
+                >
+                  <Settings className="h-5 w-5" />
+                </button>
+              </Popover.Trigger>
+              <Popover.Portal>
+                <Popover.Content
+                  className={`rounded-lg p-4 w-72 shadow-lg ${
+                    darkMode ? "bg-gray-800" : "bg-white"
+                  }`}
+                  sideOffset={5}
+                >
+                  <div className="flex flex-col space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className={`text-sm font-medium ${darkMode ? "text-gray-200" : "text-gray-900"}`}>
+                        Settings
+                      </h3>
+                      <Popover.Close className={`p-1 rounded-full hover:bg-opacity-10 ${
+                        darkMode ? "hover:bg-white" : "hover:bg-gray-900"
+                      }`}>
+                        <X className="h-4 w-4" />
+                      </Popover.Close>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <h4 className={`text-xs font-medium ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                          Appearance
+                        </h4>
+                        <div className="flex items-center justify-between">
+                          <span className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                            Dark Mode
+                          </span>
+                          <button
+                            onClick={toggleDarkMode}
+                            className={`p-1.5 rounded-full ${
+                              darkMode ? "bg-gray-700" : "bg-gray-200"
+                            }`}
+                          >
+                            {darkMode ? (
+                              <Moon className="h-4 w-4" />
+                            ) : (
+                              <Sun className="h-4 w-4" />
+                            )}
+                          </button>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <span className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                            RTL Mode
+                          </span>
+                          <button
+                            onClick={toggleRtlMode}
+                            className={`p-1.5 rounded-full ${
+                              darkMode ? "bg-gray-700" : "bg-gray-200"
+                            }`}
+                          >
+                            {rtlMode ? (
+                              <AlignLeft className="h-4 w-4" />
+                            ) : (
+                              <AlignRight className="h-4 w-4" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <h4 className={`text-xs font-medium ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                          Editor
+                        </h4>
+                        <div className="flex items-center justify-between">
+                          <span className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                            Fullscreen
+                          </span>
+                          <button
+                            onClick={toggleFullScreen}
+                            className={`p-1.5 rounded-full ${
+                              darkMode ? "bg-gray-700" : "bg-gray-200"
+                            }`}
+                          >
+                            {isFullscreen ? (
+                              <Minimize2 className="h-4 w-4" />
+                            ) : (
+                              <Maximize2 className="h-4 w-4" />
+                            )}
+                          </button>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <span className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                            Backspace
+                          </span>
+                          <button
+                            onClick={() => setBackspaceDisabled(!backspaceDisabled)}
+                            className={`p-1.5 rounded-full ${
+                              darkMode ? "bg-gray-700" : "bg-gray-200"
+                            }`}
+                          >
+                            <Delete className={`h-4 w-4 ${backspaceDisabled ? "opacity-50" : ""}`} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <Popover.Arrow className={`fill-current ${darkMode ? "text-gray-800" : "text-white"}`} />
+                </Popover.Content>
+              </Popover.Portal>
+            </Popover.Root>
           </div>
         </div>
       </div>
