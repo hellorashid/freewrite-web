@@ -1,13 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
-
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion"
-import { Menu, X, Home as HomeIcon, Settings, Bell, User, Type, Text, Clock, History, Moon, Sun, AlignLeft, AlignRight, Maximize2, Minimize2, Delete, ALargeSmall, Timer } from "lucide-react"
+import { Menu, X, Settings, History, Moon, Sun, AlignLeft, AlignRight, Maximize2, Minimize2, Delete, ALargeSmall, Timer, Type } from "lucide-react"
 import * as Popover from '@radix-ui/react-popover';
 
- function MobileMenu({ 
+function MobileMenu({ 
   darkMode, 
   setFontFamily, 
   setFontSize, 
@@ -52,7 +50,6 @@ import * as Popover from '@radix-ui/react-popover';
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
-  const [isDragging, setIsDragging] = useState(false)
   const y = useMotionValue(0)
   const dragY = useTransform(y, [-50, 50], [-50, 50])
 
@@ -69,7 +66,7 @@ import * as Popover from '@radix-ui/react-popover';
 
   const fontSizeOptions = [16, 18, 20, 22, 24, 26]
 
-  const handleDrag = (event: any, info: any) => {
+  const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: { offset: { y: number } }) => {
     const dragDistance = info.offset.y;
     const threshold = 20; // Distance needed to trigger a change
     
@@ -86,7 +83,6 @@ import * as Popover from '@radix-ui/react-popover';
   };
 
   const handleDragEnd = () => {
-    setIsDragging(false);
     y.set(0); // Reset position on drag end
   };
 
@@ -114,7 +110,7 @@ import * as Popover from '@radix-ui/react-popover';
           drag="y"
           dragConstraints={{ top: -50, bottom: 50 }}
           onDrag={handleDrag}
-          onDragStart={() => setIsDragging(true)}
+          onDragStart={() => null}
           onDragEnd={handleDragEnd}
           dragElastic={0}
           dragMomentum={false}
