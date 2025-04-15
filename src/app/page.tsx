@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion"
 import { Menu, X, Home as HomeIcon, Settings, Bell, User, Type, Text, Clock, History, Moon, Sun, AlignLeft, AlignRight, Maximize2, Minimize2, Delete, ALargeSmall, Timer } from "lucide-react"
 import * as Popover from '@radix-ui/react-popover';
 
@@ -17,6 +17,7 @@ import * as Popover from '@radix-ui/react-popover';
   stopTimer,
   timerRunning,
   setShowSidebar,
+  showSidebar,
   shareWithChatGPT,
   shareWithClaude,
   toggleDarkMode,
@@ -37,6 +38,7 @@ import * as Popover from '@radix-ui/react-popover';
   stopTimer: () => void;
   timerRunning: boolean;
   setShowSidebar: (show: boolean) => void;
+  showSidebar: boolean;
   shareWithChatGPT: () => void;
   shareWithClaude: () => void;
   toggleDarkMode: () => void;
@@ -50,6 +52,9 @@ import * as Popover from '@radix-ui/react-popover';
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const y = useMotionValue(0)
+  const dragY = useTransform(y, [-50, 50], [-50, 50])
 
   const toggleMenu = () => {
     setIsOpen(!isOpen)
@@ -64,11 +69,32 @@ import * as Popover from '@radix-ui/react-popover';
 
   const fontSizeOptions = [16, 18, 20, 22, 24, 26]
 
+  const handleDrag = (event: any, info: any) => {
+    const dragDistance = info.offset.y;
+    const threshold = 20; // Distance needed to trigger a change
+    
+    if (Math.abs(dragDistance) > threshold) {
+      const direction = dragDistance > 0 ? -1 : 1; // Up is negative, down is positive
+      const newIndex = Math.max(0, Math.min(fontSizeOptions.length - 1, fontSizeIndex + direction));
+      
+      if (newIndex !== fontSizeIndex) {
+        setFontSizeIndex(newIndex);
+        setFontSize(fontSizeOptions[newIndex]);
+        y.set(0); // Reset position immediately
+      }
+    }
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+    y.set(0); // Reset position on drag end
+  };
+
   const cycleFontSize = () => {
     const nextIndex = (fontSizeIndex + 1) % fontSizeOptions.length;
     setFontSizeIndex(nextIndex);
     setFontSize(fontSizeOptions[nextIndex]);
-  }
+  };
 
   const menuItems = [
     { 
@@ -83,7 +109,25 @@ import * as Popover from '@radix-ui/react-popover';
     { 
       icon: <ALargeSmall className="h-5 w-5" />, 
       label: "Text Size",
-      onClick: cycleFontSize
+      component: (
+        <motion.div
+          drag="y"
+          dragConstraints={{ top: -50, bottom: 50 }}
+          onDrag={handleDrag}
+          onDragStart={() => setIsDragging(true)}
+          onDragEnd={handleDragEnd}
+          dragElastic={0}
+          dragMomentum={false}
+          style={{ y: dragY }}
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-primary shadow-md cursor-grab active:cursor-grabbing"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={cycleFontSize}
+        >
+          <ALargeSmall className="h-5 w-5" />
+          <span className="sr-only">Text Size</span>
+        </motion.div>
+      )
     },
     { 
       icon: <Timer className="h-5 w-5" />, 
@@ -93,7 +137,7 @@ import * as Popover from '@radix-ui/react-popover';
     { 
       icon: <History className="h-5 w-5" />, 
       label: "History",
-      onClick: () => setShowSidebar(true)
+      onClick: () => setShowSidebar(!showSidebar)
     },
   ]
 
@@ -167,31 +211,54 @@ import * as Popover from '@radix-ui/react-popover';
             exit={{ opacity: 0, x: 20 }}
           >
             {menuItems.map((item, index) => (
-              <motion.button
-                key={index}
-                className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-primary shadow-md"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                  transition: {
-                    delay: 0.05 * (menuItems.length - 1 - index),
-                  },
-                }}
-                exit={{
-                  opacity: 0,
-                  y: 20,
-                  transition: {
-                    delay: 0.05 * index,
-                  },
-                }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={item.onClick}
-              >
-                {item.icon}
-                <span className="sr-only">{item.label}</span>
-              </motion.button>
+              item.component ? (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                    transition: {
+                      delay: 0.05 * (menuItems.length - 1 - index),
+                    },
+                  }}
+                  exit={{
+                    opacity: 0,
+                    y: 20,
+                    transition: {
+                      delay: 0.05 * index,
+                    },
+                  }}
+                >
+                  {item.component}
+                </motion.div>
+              ) : (
+                <motion.button
+                  key={index}
+                  className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-primary shadow-md"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                    transition: {
+                      delay: 0.05 * (menuItems.length - 1 - index),
+                    },
+                  }}
+                  exit={{
+                    opacity: 0,
+                    y: 20,
+                    transition: {
+                      delay: 0.05 * index,
+                    },
+                  }}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={item.onClick}
+                >
+                  {item.icon}
+                  <span className="sr-only">{item.label}</span>
+                </motion.button>
+              )
             ))}
           </motion.div>
         )}
@@ -985,6 +1052,7 @@ export default function Home() {
           stopTimer={stopTimer}
           timerRunning={timerRunning}
           setShowSidebar={setShowSidebar}
+          showSidebar={showSidebar}
           shareWithChatGPT={shareWithChatGPT}
           shareWithClaude={shareWithClaude}
           toggleDarkMode={toggleDarkMode}
@@ -1010,36 +1078,6 @@ export default function Home() {
           {/* Font controls */}
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <select
-                value={fontFamily}
-                onChange={(e) => setFontFamily(e.target.value)}
-                className={`text-sm border-0 ring-0 ${
-                  darkMode
-                    ? "bg-gray-800 text-gray-200 dark-select"
-                    : "bg-transparent text-gray-800"
-                } rounded-md p-1 border ${
-                  darkMode ? "border-gray-700" : "border-gray-200"
-                }`}
-                style={{
-                  WebkitAppearance: darkMode ? "none" : undefined,
-                  MozAppearance: darkMode ? "none" : undefined,
-                  appearance: darkMode ? "none" : undefined,
-                  backgroundImage: darkMode
-                    ? 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23e5e7eb%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")'
-                    : undefined,
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "right 0.5rem center",
-                  backgroundSize: "0.65em",
-                  paddingRight: darkMode ? "1.5rem" : undefined,
-                }}
-              >
-                {fontOptions.map((font) => (
-                  <option key={font.value} value={font.value}>
-                    {font.name}
-                  </option>
-                ))}
-              </select>
-
               <button
                 onClick={cycleFontSize}
                 className={`flex items-center space-x-1 px-2 py-1 rounded-md ${
@@ -1049,7 +1087,25 @@ export default function Home() {
                 }`}
                 title="Change font size"
               >
+                <ALargeSmall className="h-4 w-4" />
                 <span className="text-sm">{fontSize}px</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  const currentIndex = fontOptions.findIndex(f => f.value === fontFamily)
+                  const nextIndex = (currentIndex + 1) % fontOptions.length
+                  setFontFamily(fontOptions[nextIndex].value)
+                }}
+                className={`flex items-center space-x-1 px-2 py-1 rounded-md ${
+                  darkMode
+                    ? "bg-gray-800 text-gray-200 hover:bg-gray-700"
+                    : "bg-transparent text-gray-800 hover:bg-gray-100"
+                }`}
+                title="Change font"
+              >
+                <Type className="h-4 w-4" />
+                <span className="text-sm">{fontOptions.find(f => f.value === fontFamily)?.name}</span>
               </button>
             </div>
           </div>
