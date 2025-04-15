@@ -292,6 +292,15 @@ function MobileMenu({
                   </button>
                 </div>
                 
+                <a
+                  href="https://github.com/hellorashid/freewrite-web"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`text-xs ${darkMode ? "text-gray-400 hover:text-gray-300" : "text-gray-500 hover:text-gray-700"} underline`}
+                >
+                  View on GitHub
+                </a>
+                
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <h4 className={`text-xs font-medium ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
@@ -1287,6 +1296,15 @@ export default function Home() {
                         <X className="h-4 w-4" />
                       </Popover.Close>
                     </div>
+                    
+                    <a
+                      href="https://github.com/hellorashid/freewrite-web"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`text-xs ${darkMode ? "text-gray-400 hover:text-gray-300" : "text-gray-500 hover:text-gray-700"} underline`}
+                    >
+                      View on GitHub
+                    </a>
                     
                     <div className="space-y-4">
                       <div className="space-y-2">
