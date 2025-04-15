@@ -335,9 +335,9 @@ function MobileMenu({
                         }`}
                       >
                         {rtlMode ? (
-                          <AlignLeft className="h-4 w-4" />
-                        ) : (
                           <AlignRight className="h-4 w-4" />
+                        ) : (
+                          <AlignLeft className="h-4 w-4" />
                         )}
                       </button>
                     </div>
@@ -1340,9 +1340,9 @@ export default function Home() {
                             }`}
                           >
                             {rtlMode ? (
-                              <AlignLeft className="h-4 w-4" />
-                            ) : (
                               <AlignRight className="h-4 w-4" />
+                            ) : (
+                              <AlignLeft className="h-4 w-4" />
                             )}
                           </button>
                         </div>
